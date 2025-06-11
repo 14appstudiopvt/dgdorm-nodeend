@@ -76,28 +76,33 @@ const PORT = process.env.PORT || 3000;
 
 // MongoDB Connection Configuration
 const mongooseOptions = {
-  serverSelectionTimeoutMS: 5000, // How long to wait for server selection
-  socketTimeoutMS: 45000,         // How long to wait for socket responses
-  maxPoolSize: 10,                // Maximum number of connections
-  minPoolSize: 2,                 // Minimum number of connections
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+  family: 4
 };
 
 // MongoDB Connection String
-const MONGODB_URI = process.env.MONGODB_URI || 
-  'mongodb+srv://14appstudiopvt:sm0kFvewjeV22ZI7@cluster0.98baoec.mongodb.net/dgdorm?retryWrites=true&w=majority';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://14appstudiopvt:sm0kFvewjeV22ZI7@cluster0.98baoec.mongodb.net/dgdorm?retryWrites=true&w=majority';
 
 // Connect to MongoDB
-console.log('Connecting to MongoDB...');
-mongoose.connect(MONGODB_URI, mongooseOptions)
-  .then(() => {
+const connectDB = async () => {
+  try {
+    if (!MONGODB_URI) {
+      throw new Error('MongoDB URI is not defined');
+    }
+    await mongoose.connect(MONGODB_URI, mongooseOptions);
     console.log('✅ MongoDB connected successfully');
     console.log(`📍 Database: ${mongoose.connection.name}`);
-  })
-  .catch(err => {
-    console.error('❌ MongoDB connection error:', err.message);
-    console.error('Full error:', err);
-    process.exit(1);
-  });
+  } catch (error) {
+    console.error('❌ MongoDB connection error:', error.message);
+    console.error('Full error:', error);
+    // Don't exit process in serverless environment
+  }
+};
+
+connectDB();
 
 // MongoDB connection event handlers
 mongoose.connection.on('connected', () => {
@@ -161,21 +166,12 @@ app.get('/', (req, res) => {
 
 // Health check route
 app.get('/health', (req, res) => {
-  const healthStatus = {
-    status: 'OK',
-    timestamp: req.timestamp,
-    uptime: process.uptime(),
-    memory: process.memoryUsage(),
-    database: {
-      status: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected',
-      readyState: mongoose.connection.readyState,
-      host: mongoose.connection.host,
-      name: mongoose.connection.name
-    },
-    environment: process.env.NODE_ENV || 'development'
-  };
-  
-  res.json(healthStatus);
+  const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+  res.status(200).json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    database: dbStatus
+  });
 });
 
 // API info route
@@ -186,27 +182,17 @@ app.get('/api', (req, res) => {
     endpoints: {
       auth: '/api/auth',
       health: '/health'
-    },
-    timestamp: req.timestamp
+    }
   });
 });
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error('🚨 Error occurred:', {
-    message: err.message,
-    stack: err.stack,
-    timestamp: req.timestamp,
-    url: req.url,
-    method: req.method
-  });
-  
-  res.status(err.status || 500).json({ 
-    message: process.env.NODE_ENV === 'production' 
-      ? 'Something went wrong!' 
-      : err.message,
-    timestamp: req.timestamp,
-    ...(process.env.NODE_ENV !== 'production' && { stack: err.stack })
+  console.error('Error:', err);
+  res.status(500).json({
+    success: false,
+    message: 'Internal server error',
+    error: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
   });
 });
 
@@ -255,14 +241,11 @@ process.on('unhandledRejection', (err) => {
 });
 
 // Start server
-const server = app.listen(PORT, () => {
-  console.log(`\n🚀 Server is running on port ${PORT}`);
-  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`📍 Local URL: http://localhost:${PORT}`);
-  console.log(`⚡ API Base URL: http://localhost:${PORT}/api`);
-  console.log(`💚 Health Check: http://localhost:${PORT}/health`);
-  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
-});
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+}
 
 // Export app for testing
 module.exports = app;

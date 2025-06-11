@@ -2,22 +2,22 @@
   "version": 2,
   "builds": [
     {
-      "src": "src/**/*.js",
+      "src": "src/index.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/api/auth/(.*)",
-      "dest": "/src/routes/auth.js"
+      "dest": "/src/index.js"
     },
     {
       "src": "/api/(.*)",
-      "dest": "/src/api/$1"
+      "dest": "/src/index.js"
     },
     {
       "src": "/(.*)",
-      "dest": "/src/$1"
+      "dest": "/src/index.js"
     }
   ],
   "env": {
