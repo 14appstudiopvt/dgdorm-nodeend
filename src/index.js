@@ -154,9 +154,9 @@ app.use((req, res, next) => {
 // API Routes
 app.use('/api/auth', authRoutes);
 
-// Root route
+// Root route - must be before other routes
 app.get('/', (req, res) => {
-  res.json({ 
+  res.json({
     message: 'Welcome to the DG Dorm API',
     version: '1.0.0',
     timestamp: req.timestamp,
@@ -186,6 +186,15 @@ app.get('/api', (req, res) => {
   });
 });
 
+// 404 handler - must be after all routes
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: 'Route not found',
+    path: req.path
+  });
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Error:', err);
@@ -193,16 +202,6 @@ app.use((err, req, res, next) => {
     success: false,
     message: 'Internal server error',
     error: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
-  });
-});
-
-// Handle 404 - Route not found
-app.use('*', (req, res) => {
-  res.status(404).json({ 
-    message: 'Route not found',
-    timestamp: req.timestamp,
-    requestedUrl: req.originalUrl,
-    method: req.method
   });
 });
 
