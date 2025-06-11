@@ -80,86 +80,66 @@ const mongooseOptions = {
   useUnifiedTopology: true,
   serverSelectionTimeoutMS: 5000,
   socketTimeoutMS: 45000,
-  family: 4
+  family: 4,
+  maxPoolSize: 1, // Important for serverless
+  minPoolSize: 0  // Important for serverless
 };
 
 // MongoDB Connection String
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://14appstudiopvt:sm0kFvewjeV22ZI7@cluster0.98baoec.mongodb.net/dgdorm?retryWrites=true&w=majority';
 
+// Global variable to track connection status
+let isConnected = false;
+
 // Connect to MongoDB
 const connectDB = async () => {
+  if (isConnected) {
+    console.log('Using existing database connection');
+    return;
+  }
+
   try {
     if (!MONGODB_URI) {
       throw new Error('MongoDB URI is not defined');
     }
+
     await mongoose.connect(MONGODB_URI, mongooseOptions);
+    isConnected = true;
     console.log('✅ MongoDB connected successfully');
-    console.log(`📍 Database: ${mongoose.connection.name}`);
   } catch (error) {
     console.error('❌ MongoDB connection error:', error.message);
-    console.error('Full error:', error);
-    // Don't exit process in serverless environment
+    isConnected = false;
   }
 };
 
-connectDB();
+// Middleware
+app.use(helmet());
+app.use(cors());
+app.use(morgan('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// MongoDB connection event handlers
-mongoose.connection.on('connected', () => {
-  console.log('🔗 Mongoose connected to MongoDB');
+// Database connection middleware
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    console.error('Database connection error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Database connection error',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
 });
-
-mongoose.connection.on('error', (err) => {
-  console.error('🚨 Mongoose connection error:', err);
-});
-
-mongoose.connection.on('disconnected', () => {
-  console.log('🔌 Mongoose disconnected from MongoDB');
-});
-
-// Security and CORS middleware
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "https:"],
-    },
-  },
-}));
-
-// CORS configuration
-app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? process.env.FRONTEND_URL 
-    : ['http://localhost:3000', 'http://localhost:3001', 'http://127.0.0.1:3000'],
-  credentials: true,
-  optionsSuccessStatus: 200
-}));
-
-// Logging middleware
-app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
-
-// Body parsing middleware
-app.use(express.json({ limit: '10mb' })); // Parse JSON bodies with size limit
-app.use(express.urlencoded({ extended: true, limit: '10mb' })); // Parse URL-encoded bodies
-
-// Request timestamp middleware
-app.use((req, res, next) => {
-  req.timestamp = new Date().toISOString();
-  next();
-});
-
-// API Routes
-app.use('/api/auth', authRoutes);
 
 // Root route - must be before other routes
 app.get('/', (req, res) => {
   res.json({
     message: 'Welcome to the DG Dorm API',
     version: '1.0.0',
-    timestamp: req.timestamp,
+    timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development'
   });
 });
@@ -170,7 +150,8 @@ app.get('/health', (req, res) => {
   res.status(200).json({ 
     status: 'ok', 
     timestamp: new Date().toISOString(),
-    database: dbStatus
+    database: dbStatus,
+    isConnected
   });
 });
 
@@ -185,6 +166,9 @@ app.get('/api', (req, res) => {
     }
   });
 });
+
+// API Routes
+app.use('/api/auth', authRoutes);
 
 // 404 handler - must be after all routes
 app.use((req, res) => {
@@ -205,46 +189,5 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Graceful shutdown handlers
-const gracefulShutdown = async (signal) => {
-  console.log(`\n🛑 Received ${signal}. Shutting down gracefully...`);
-  
-  try {
-    // Close MongoDB connection
-    await mongoose.connection.close();
-    console.log('📦 MongoDB connection closed');
-    
-    // Exit process
-    console.log('✅ Server shutdown complete');
-    process.exit(0);
-  } catch (error) {
-    console.error('❌ Error during shutdown:', error);
-    process.exit(1);
-  }
-};
-
-// Listen for termination signals
-process.on('SIGINT', () => gracefulShutdown('SIGINT'));
-process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
-
-// Handle uncaught exceptions
-process.on('uncaughtException', (err) => {
-  console.error('🚨 Uncaught Exception:', err);
-  process.exit(1);
-});
-
-// Handle unhandled promise rejections
-process.on('unhandledRejection', (err) => {
-  console.error('🚨 Unhandled Promise Rejection:', err);
-  process.exit(1);
-});
-
-// Start server
-if (process.env.NODE_ENV !== 'production') {
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-  });
-}
-
-// Export app for testing
-module.exports = app; // Do NOT call app.listen()
+// Export the Express app for Vercel serverless functions
+module.exports = app;
