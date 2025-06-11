@@ -78,17 +78,10 @@ const PORT = process.env.PORT || 3000;
 const mongooseOptions = {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-  maxPoolSize: 1,
-  minPoolSize: 0,
-  serverSelectionTimeoutMS: 120000, // 2 minutes
-  socketTimeoutMS: 180000, // 3 minutes
-  connectTimeoutMS: 120000, // 2 minutes
+
   retryWrites: true,
   retryReads: true,
   w: 'majority',
-  wtimeoutMS: 120000, // 2 minutes
-  heartbeatFrequencyMS: 10000, // 10 seconds
-  maxIdleTimeMS: 60000 // 1 minute
 };
 
 // MongoDB Connection String
