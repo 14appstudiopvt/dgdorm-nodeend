@@ -17,9 +17,61 @@ const generateOTP = () => {
 };
 
 // Register a new user
+// exports.register = async (req, res) => {
+//     try {
+//         const { email, password, name, phone } = req.body;
+
+//         // Check if user already exists
+//         const existingUser = await User.findOne({ email });
+//         if (existingUser) {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: 'User already exists'
+//             });
+//         }
+
+//         // Generate OTP
+//         const otp = Math.floor(100000 + Math.random() * 900000).toString();
+//         const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+//         // Create new user with OTP
+//         const user = await User.create({
+//             email,
+//             password,
+//             name,
+//             phone,
+//             otp: {
+//                 code: otp,
+//                 expires: otpExpiry,
+//                 attempts: 0,
+//                 lastSent: new Date()
+//             }
+//         });
+
+//         // Send OTP email
+//         await sendOTPEmail(email, otp);
+
+//         res.status(201).json({
+//             success: true,
+//             message: 'Registration successful. Please verify your email with the OTP sent.',
+//             data: {
+//                 email: user.email,
+//                 name: user.name
+//             }
+//         });
+//     } catch (error) {
+//         console.error('Registration error:', error);
+//         res.status(500).json({
+//             success: false,
+//             message: 'Registration failed',
+//             error: error.message
+//         });
+//     }
+// };
+// ...existing code...
 exports.register = async (req, res) => {
     try {
-        const { email, password, name, phone } = req.body;
+        const { email, password, name, phone, location, devicePreferences } = req.body;
 
         // Check if user already exists
         const existingUser = await User.findOne({ email });
@@ -34,12 +86,14 @@ exports.register = async (req, res) => {
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-        // Create new user with OTP
+        // Create new user with OTP, location, and devicePreferences
         const user = await User.create({
             email,
             password,
             name,
             phone,
+            location,
+            devicePreferences,
             otp: {
                 code: otp,
                 expires: otpExpiry,
@@ -56,7 +110,9 @@ exports.register = async (req, res) => {
             message: 'Registration successful. Please verify your email with the OTP sent.',
             data: {
                 email: user.email,
-                name: user.name
+                name: user.name,
+                location: user.location,
+                devicePreferences: user.devicePreferences
             }
         });
     } catch (error) {
@@ -68,6 +124,7 @@ exports.register = async (req, res) => {
         });
     }
 };
+// ...existing code...
 
 // Verify OTP
 exports.verifyOTP = async (req, res) => {
