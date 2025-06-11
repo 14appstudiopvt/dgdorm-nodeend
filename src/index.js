@@ -248,4 +248,4 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // Export app for testing
-module.exports = app;
+module.exports = app; // Do NOT call app.listen()
