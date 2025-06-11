@@ -78,9 +78,6 @@ const PORT = process.env.PORT || 3000;
 const mongooseOptions = {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-  serverSelectionTimeoutMS: 5000,
-  socketTimeoutMS: 45000,
-  family: 4,
   maxPoolSize: 1, // Important for serverless
   minPoolSize: 0  // Important for serverless
 };
