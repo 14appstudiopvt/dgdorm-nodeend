@@ -17,7 +17,6 @@ const mongooseOptions = {
   retryReads: true,
   w: 'majority',
   bufferCommands: true,
-  bufferMaxEntries: 0,
   autoIndex: true,
   autoCreate: true
 };
