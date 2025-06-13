@@ -2,6 +2,7 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { sendOTPEmail } = require('../utils/sendOTPEmail');
+const connectDB = require('../db/db.js');
 
 // Generate JWT Token
 const generateToken = (userId) => {
@@ -71,6 +72,7 @@ const generateOTP = () => {
 // ...existing code...
 exports.register = async (req, res) => {
     try {
+        await connectDB();
         const { email, password, name, phone, location, devicePreferences } = req.body;
 
         // Check if user already exists
@@ -129,6 +131,7 @@ exports.register = async (req, res) => {
 // Verify OTP
 exports.verifyOTP = async (req, res) => {
     try {
+        await connectDB();
         const email = req.query.email || req.body.email;
         const otp = req.query.otp || req.body.otp;
 
@@ -228,6 +231,7 @@ exports.verifyOTP = async (req, res) => {
 // Resend OTP
 exports.resendOTP = async (req, res) => {
     try {
+        await connectDB();
         const email = req.query.email || req.body.email;
 
         if (!email) {
@@ -282,6 +286,7 @@ exports.resendOTP = async (req, res) => {
 // Login user
 exports.login = async (req, res) => {
     try {
+        await connectDB();
         const { email, password } = req.body;
 
         if (!email || !password) {
@@ -344,6 +349,7 @@ exports.login = async (req, res) => {
 // Forgot password
 exports.forgotPassword = async (req, res) => {
     try {
+        await connectDB();
         const email = req.query.email || req.body.email;
 
         if (!email) {
@@ -398,6 +404,7 @@ exports.forgotPassword = async (req, res) => {
 // Verify OTP for password reset
 exports.verifyResetOTP = async (req, res) => {
     try {
+        await connectDB();
         const email = req.query.email || req.body.email;
         const otp = req.query.otp || req.body.otp;
 
@@ -475,6 +482,7 @@ exports.verifyResetOTP = async (req, res) => {
 // Reset password
 exports.resetPassword = async (req, res) => {
     try {
+        await connectDB();
         const { resetToken, newPassword } = req.body;
 
         if (!resetToken || !newPassword) {
@@ -546,6 +554,7 @@ exports.resetPassword = async (req, res) => {
 // Logout user
 exports.logout = async (req, res) => {
     try {
+        await connectDB();
         // Since we're using JWT, we don't need to do anything server-side
         // The client should remove the token
         res.status(200).json({
