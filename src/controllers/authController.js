@@ -72,8 +72,17 @@ const generateOTP = () => {
 // ...existing code...
 exports.register = async (req, res) => {
     try {
-        // await connectDB();
-        const { email, password, name, phone, location, devicePreferences } = req.body;
+        const {
+            firstName,
+            lastName,
+            email,
+            password,
+            phone,
+            dateOfBirth,
+            gender,
+            address,
+            profilePicture
+        } = req.body;
 
         // Check if user already exists
         const existingUser = await User.findOne({ email });
@@ -88,14 +97,17 @@ exports.register = async (req, res) => {
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-        // Create new user with OTP, location, and devicePreferences
+        // Create new user with OTP
         const user = await User.create({
+            firstName,
+            lastName,
             email,
             password,
-            name,
             phone,
-            location,
-            devicePreferences,
+            dateOfBirth,
+            gender,
+            address,
+            profilePicture,
             otp: {
                 code: otp,
                 expires: otpExpiry,
@@ -112,9 +124,8 @@ exports.register = async (req, res) => {
             message: 'Registration successful. Please verify your email with the OTP sent.',
             data: {
                 email: user.email,
-                name: user.name,
-                location: user.location,
-                devicePreferences: user.devicePreferences
+                firstName: user.firstName,
+                lastName: user.lastName
             }
         });
     } catch (error) {
