@@ -297,7 +297,6 @@ exports.resendOTP = async (req, res) => {
 // Login user
 exports.login = async (req, res) => {
     try {
-        // await connectDB();
         const { email, password } = req.body;
 
         if (!email || !password) {
@@ -307,7 +306,8 @@ exports.login = async (req, res) => {
             });
         }
 
-        const user = await User.findOne({ email });
+        // Explicitly select password field
+        const user = await User.findOne({ email }).select('+password');
         if (!user) {
             return res.status(404).json({
                 success: false,
@@ -336,13 +336,18 @@ exports.login = async (req, res) => {
             { expiresIn: '30d' }
         );
 
+        // Update last login
+        user.lastLogin = new Date();
+        await user.save();
+
         res.status(200).json({
             success: true,
             message: 'Login successful',
             token,
             user: {
                 id: user._id,
-                name: user.name,
+                firstName: user.firstName,
+                lastName: user.lastName,
                 email: user.email,
                 isVerified: user.isVerified
             }
