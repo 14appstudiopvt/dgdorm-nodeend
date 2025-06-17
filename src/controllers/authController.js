@@ -349,7 +349,23 @@ exports.login = async (req, res) => {
                 firstName: user.firstName,
                 lastName: user.lastName,
                 email: user.email,
-                isVerified: user.isVerified
+                phone: user.phone,
+                dateOfBirth: user.dateOfBirth,
+                gender: user.gender,
+                address: {
+                    street: user.address.street,
+                    city: user.address.city,
+                    state: user.address.state,
+                    country: user.address.country,
+                    zipCode: user.address.zipCode
+                },
+                profilePicture: user.profilePicture,
+                role: user.role,
+                isVerified: user.isVerified,
+                lastLogin: user.lastLogin,
+                createdAt: user.createdAt,
+                socialLogins: user.socialLogins,
+                active: user.active
             }
         });
     } catch (error) {
