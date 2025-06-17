@@ -15,10 +15,7 @@ const mongooseOptions = {
   connectTimeoutMS: 120000,
   retryWrites: true,
   retryReads: true,
-  w: 'majority',
-  bufferCommands: true,
-  autoIndex: true,
-  autoCreate: true
+  w: 'majority'
 };
 
 let cached = global.mongoose;

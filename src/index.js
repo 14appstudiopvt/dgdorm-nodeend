@@ -85,11 +85,7 @@ const mongooseOptions = {
   connectTimeoutMS: 120000,
   retryWrites: true,
   retryReads: true,
-  w: 'majority',
-  bufferCommands: true,
-  bufferMaxEntries: 0,
-  autoIndex: true,
-  autoCreate: true
+  w: 'majority'
 };
 
 // MongoDB Connection String
