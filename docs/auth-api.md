@@ -18,10 +18,15 @@ Register a new user and send verification OTP.
 
 ```json
 {
+  "firstName": "John",
+  "lastName": "Doe",
   "email": "user@example.com",
   "password": "yourpassword",
-  "name": "User Name",
-  "phone": "1234567890"
+  "phone": "1234567890",
+  "dateOfBirth": "1990-01-01",
+  "gender": "male",
+  "address": "string",
+  "profilePicture": "https://example.com/profile.jpg"
 }
 ```
 
@@ -33,10 +38,17 @@ Register a new user and send verification OTP.
   "message": "Registration successful. Please verify your email with the OTP sent.",
   "data": {
     "email": "user@example.com",
-    "name": "User Name"
+    "firstName": "John",
+    "lastName": "Doe"
   }
 }
 ```
+
+**Error Responses:**
+
+- 400 Bad Request: Invalid input data
+- 409 Conflict: Email already exists
+- 500 Internal Server Error: Server error
 
 ### 2. Verify OTP
 
@@ -68,12 +80,19 @@ Verify the OTP sent during registration.
   "token": "jwt_token_here",
   "user": {
     "id": "user_id",
-    "name": "User Name",
+    "firstName": "John",
+    "lastName": "Doe",
     "email": "user@example.com",
     "isVerified": true
   }
 }
 ```
+
+**Error Responses:**
+
+- 400 Bad Request: Invalid OTP or email
+- 404 Not Found: User not found
+- 500 Internal Server Error: Server error
 
 ### 3. Resend OTP
 
@@ -108,6 +127,13 @@ Request a new OTP for email verification.
 }
 ```
 
+**Error Responses:**
+
+- 400 Bad Request: Invalid email
+- 404 Not Found: User not found
+- 429 Too Many Requests: Rate limit exceeded
+- 500 Internal Server Error: Server error
+
 ### 4. Login
 
 Login with email and password.
@@ -132,12 +158,27 @@ Login with email and password.
   "token": "jwt_token_here",
   "user": {
     "id": "user_id",
-    "name": "User Name",
+    "firstName": "John",
+    "lastName": "Doe",
     "email": "user@example.com",
-    "isVerified": true
+    "phone": "1234567890",
+    "dateOfBirth": "1990-01-01",
+    "gender": "male",
+    "address": "123 Main St",
+    "profilePicture": "https://example.com/profile.jpg",
+    "isVerified": true,
+    "lastLogin": "2024-03-20T10:00:00Z"
   }
 }
 ```
+
+**Error Responses:**
+
+- 400 Bad Request: Email and password are required
+- 401 Unauthorized: Invalid password
+- 403 Forbidden: Account not verified
+- 404 Not Found: User not found
+- 500 Internal Server Error: Server error
 
 ### 5. Forgot Password
 
@@ -171,130 +212,3 @@ Request a password reset OTP.
   }
 }
 ```
-
-### 6. Verify Reset OTP
-
-Verify the OTP for password reset.
-
-**Endpoint:** `POST /verify-reset-otp` or `GET /verify-reset-otp`
-
-**Request Body (POST):**
-
-```json
-{
-  "email": "user@example.com",
-  "otp": "123456"
-}
-```
-
-**Query Parameters (GET):**
-
-```
-?email=user@example.com&otp=123456
-```
-
-**Response:**
-
-```json
-{
-  "success": true,
-  "message": "OTP verified successfully",
-  "resetToken": "temporary_reset_token"
-}
-```
-
-### 7. Reset Password
-
-Reset password using the reset token.
-
-**Endpoint:** `POST /reset-password`
-
-**Request Body:**
-
-```json
-{
-  "resetToken": "temporary_reset_token",
-  "newPassword": "newpassword"
-}
-```
-
-**Response:**
-
-```json
-{
-  "success": true,
-  "message": "Password reset successful",
-  "token": "new_jwt_token",
-  "user": {
-    "id": "user_id",
-    "name": "User Name",
-    "email": "user@example.com",
-    "isVerified": true
-  }
-}
-```
-
-### 8. Logout
-
-Logout user (requires authentication).
-
-**Endpoint:** `POST /logout`
-
-**Headers:**
-
-```
-Authorization: Bearer your_jwt_token
-```
-
-**Response:**
-
-```json
-{
-  "success": true,
-  "message": "Logged out successfully"
-}
-```
-
-## Error Responses
-
-All endpoints return error responses in the following format:
-
-```json
-{
-  "success": false,
-  "message": "Error message here",
-  "error": "Detailed error message (if any)"
-}
-```
-
-Common HTTP Status Codes:
-
-- 200: Success
-- 201: Created
-- 400: Bad Request
-- 401: Unauthorized
-- 403: Forbidden
-- 404: Not Found
-- 500: Internal Server Error
-
-## Authentication
-
-Most endpoints require a JWT token in the Authorization header:
-
-```
-Authorization: Bearer your_jwt_token
-```
-
-## Rate Limiting
-
-- OTP requests are limited to 3 attempts
-- OTP expires after 10 minutes
-- Reset token expires after 15 minutes
-
-## Notes
-
-1. All timestamps are in UTC
-2. Passwords must be at least 6 characters long
-3. Email addresses must be unique
-4. OTP is a 6-digit number
-5. JWT tokens expire after 30 days

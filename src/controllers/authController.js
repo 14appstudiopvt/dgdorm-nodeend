@@ -306,7 +306,7 @@ exports.login = async (req, res) => {
             });
         }
 
-        // Explicitly select password field
+        // Get all user data except password
         const user = await User.findOne({ email }).select('+password');
         if (!user) {
             return res.status(404).json({
@@ -340,33 +340,15 @@ exports.login = async (req, res) => {
         user.lastLogin = new Date();
         await user.save();
 
+        // Convert user document to plain object and remove password
+        const userData = user.toObject();
+        delete userData.password;
+
         res.status(200).json({
             success: true,
             message: 'Login successful',
             token,
-            user: {
-                id: user._id,
-                firstName: user.firstName,
-                lastName: user.lastName,
-                email: user.email,
-                phone: user.phone,
-                dateOfBirth: user.dateOfBirth,
-                gender: user.gender,
-                address: {
-                    street: user.address.street,
-                    city: user.address.city,
-                    state: user.address.state,
-                    country: user.address.country,
-                    zipCode: user.address.zipCode
-                },
-                profilePicture: user.profilePicture,
-                role: user.role,
-                isVerified: user.isVerified,
-                lastLogin: user.lastLogin,
-                createdAt: user.createdAt,
-                socialLogins: user.socialLogins,
-                active: user.active
-            }
+            user: userData
         });
     } catch (error) {
         console.error('Login error:', error);
