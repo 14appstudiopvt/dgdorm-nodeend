@@ -69,7 +69,7 @@ const mongoose = require('mongoose');
 
 // Import routes
 const authRoutes = require('./routes/auth');
-
+const categoryRoutes = require('./routes/categoryRoutes');
 // Initialize Express app
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -243,6 +243,7 @@ app.get('/api', (req, res) => {
     version: '1.0.0',
     endpoints: {
       auth: '/api/auth',
+      categories: '/api/categories',
       health: '/health'
     }
   });
@@ -250,6 +251,7 @@ app.get('/api', (req, res) => {
 
 // API Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/categories', categoryRoutes);
 
 // 404 handler - must be after all routes
 app.use((req, res) => {
