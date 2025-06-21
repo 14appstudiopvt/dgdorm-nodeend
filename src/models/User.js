@@ -74,6 +74,11 @@ const userSchema = new mongoose.Schema({
     lastSent: {
       type: Date,
       default: null
+    },
+    role: {
+        type: String,
+        enum: ['user', 'owner', 'admin'],
+        default: 'user'
     }
   },
   createdAt: {
@@ -92,6 +97,7 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   }
+
 }, {
   timestamps: true
 });

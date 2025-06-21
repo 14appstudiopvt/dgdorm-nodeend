@@ -17,59 +17,7 @@ const generateOTP = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
-// Register a new user
-// exports.register = async (req, res) => {
-//     try {
-//         const { email, password, name, phone } = req.body;
 
-//         // Check if user already exists
-//         const existingUser = await User.findOne({ email });
-//         if (existingUser) {
-//             return res.status(400).json({
-//                 success: false,
-//                 message: 'User already exists'
-//             });
-//         }
-
-//         // Generate OTP
-//         const otp = Math.floor(100000 + Math.random() * 900000).toString();
-//         const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-
-//         // Create new user with OTP
-//         const user = await User.create({
-//             email,
-//             password,
-//             name,
-//             phone,
-//             otp: {
-//                 code: otp,
-//                 expires: otpExpiry,
-//                 attempts: 0,
-//                 lastSent: new Date()
-//             }
-//         });
-
-//         // Send OTP email
-//         await sendOTPEmail(email, otp);
-
-//         res.status(201).json({
-//             success: true,
-//             message: 'Registration successful. Please verify your email with the OTP sent.',
-//             data: {
-//                 email: user.email,
-//                 name: user.name
-//             }
-//         });
-//     } catch (error) {
-//         console.error('Registration error:', error);
-//         res.status(500).json({
-//             success: false,
-//             message: 'Registration failed',
-//             error: error.message
-//         });
-//     }
-// };
-// ...existing code...
 exports.register = async (req, res) => {
     try {
         const {
@@ -81,7 +29,8 @@ exports.register = async (req, res) => {
             dateOfBirth,
             gender,
             address,
-            profilePicture
+            profilePicture,
+            role
         } = req.body;
 
         // Check if user already exists
@@ -108,6 +57,7 @@ exports.register = async (req, res) => {
             gender,
             address,
             profilePicture,
+            role,
             otp: {
                 code: otp,
                 expires: otpExpiry,
@@ -125,7 +75,8 @@ exports.register = async (req, res) => {
             data: {
                 email: user.email,
                 firstName: user.firstName,
-                lastName: user.lastName
+                lastName: user.lastName,
+                role: user.role,
             }
         });
     } catch (error) {
@@ -213,7 +164,7 @@ exports.verifyOTP = async (req, res) => {
         await user.save();
 
         const token = jwt.sign(
-            { id: user._id },
+            { id: user._id, role: user.role },
             process.env.JWT_SECRET || 'dgdorm_secure_jwt_secret_key_2024',
             { expiresIn: '30d' }
         );
