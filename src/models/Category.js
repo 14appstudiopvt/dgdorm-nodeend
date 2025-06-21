@@ -14,7 +14,9 @@ const CategorySchema = new mongoose.Schema({
   icon: {
     type: String, // Store a URL or icon name
     default: ''
-  }
+  },
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' } // <-- Add this line
+
 }, { timestamps: true });
 
 module.exports = mongoose.model('Category', CategorySchema);

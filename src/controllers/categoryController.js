@@ -3,14 +3,23 @@ const Category = require('../models/Category');
 // Create
 exports.createCategory = async (req, res) => {
     try {
-        const { name, description } = req.body;
-        if (!name) return res.status(400).json({ success: false, message: 'Name required' });
-        const exists = await Category.findOne({ name });
-        if (exists) return res.status(400).json({ success: false, message: 'Category exists' });
-        const category = await Category.create({ name, description });
+        const { name, description, icon } = req.body;
+        if (!name) {
+            return res.status(400).json({ success: false, message: 'Category name is required' });
+        }
+        const existing = await Category.findOne({ name });
+        if (existing) {
+            return res.status(400).json({ success: false, message: 'Category already exists' });
+        }
+        const category = await Category.create({
+            name,
+            description,
+            icon,
+            createdBy: req.user._id // <-- Associate with the logged-in user
+        });
         res.status(201).json({ success: true, data: category });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Failed to create category', error: error.message });
     }
 };
 
@@ -18,6 +27,16 @@ exports.createCategory = async (req, res) => {
 exports.getCategories = async (req, res) => {
     try {
         const categories = await Category.find();
+        res.status(200).json({ success: true, data: categories });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// read using sepcifc name
+exports.getCategoriesByName = async (req, res) => {
+    try {
+        const categories = await Category.find().populate('createdBy', 'firstName lastName email role');
         res.status(200).json({ success: true, data: categories });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });

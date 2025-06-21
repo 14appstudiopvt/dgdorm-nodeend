@@ -9,10 +9,24 @@ const { protect, requireAdmin } = require('../middleware/auth');
 
 const router = express.Router();
 
+// Base category route info
+router.get('/', (req, res) => {
+  res.json({
+    message: 'Category Management API',
+    endpoints: {
+      createCategory: 'POST /api/categories',
+      getCategories: 'GET /api/categories',
+      updateCategory: 'PUT /api/categories/:id',
+      deleteCategory: 'DELETE /api/categories/:id'
+    }
+  });
+});
+
 // Admin-only category management
-router.post('/categories', protect, requireAdmin, createCategory);
-router.get('/categories', protect, requireAdmin, getCategories);
-router.put('/categories/:id', protect, requireAdmin, updateCategory);
-router.delete('/categories/:id', protect, requireAdmin, deleteCategory);
+router.post('/', protect, requireAdmin, createCategory);
+router.get('/', protect, requireAdmin, getCategories);
+router.get('/name/:name', protect, requireAdmin, getCategoryByName);
+router.put('/:id', protect, requireAdmin, updateCategory);
+router.delete('/:id', protect, requireAdmin, deleteCategory);
 
 module.exports = router;
