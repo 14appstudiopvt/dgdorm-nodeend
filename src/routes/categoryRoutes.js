@@ -2,6 +2,7 @@ const express = require('express');
 const {
   createCategory,
   getCategories,
+  getCategoryByName,
   updateCategory,
   deleteCategory
 } = require('../controllers/categoryController');
@@ -10,12 +11,13 @@ const { protect, requireAdmin } = require('../middleware/auth');
 const router = express.Router();
 
 // Base category route info
-router.get('/', (req, res) => {
+router.get('/infoCatogery', (req, res) => {
   res.json({
     message: 'Category Management API',
     endpoints: {
       createCategory: 'POST /api/categories',
       getCategories: 'GET /api/categories',
+      getCategoryByName: 'GET /api/categories/name/:name',
       updateCategory: 'PUT /api/categories/:id',
       deleteCategory: 'DELETE /api/categories/:id'
     }
