@@ -15,6 +15,14 @@
       "dest": "/src/index.js"
     },
     {
+      "src": "/api/auth/(.*)",
+      "dest": "/src/index.js"
+    },
+    {
+      "src": "/api/categories/(.*)",
+      "dest": "/src/index.js"
+    },
+    {
       "src": "/api/(.*)",
       "dest": "/src/index.js"
     },
