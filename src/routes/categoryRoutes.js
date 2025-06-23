@@ -7,6 +7,7 @@ const {
   deleteCategory
 } = require('../controllers/categoryController');
 const { protect, requireAdmin } = require('../middleware/auth');
+const upload = require('../middleware/upload');
 
 const router = express.Router();
 
@@ -25,7 +26,7 @@ router.get('/infoCategory', (req, res) => {
 });
 
 // Admin-only category management
-router.post('/create-category', protect, requireAdmin, createCategory);
+router.post('/create-category', protect, requireAdmin, upload.single('icon'), createCategory);
 router.get('/get-all-category', protect, requireAdmin, getCategories);
 router.get('/get-category-by-name/:name', protect, requireAdmin, getCategoriesByName);
 router.put('/update-category-by-id/:id', protect, requireAdmin, updateCategory);
