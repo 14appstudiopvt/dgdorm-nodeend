@@ -74,16 +74,7 @@ const userSchema = new mongoose.Schema({
     lastSent: {
       type: Date,
       default: null
-    },
-    role: {
-        type: String,
-        enum: ['user', 'owner', 'admin'],
-        default: 'user'
     }
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
   },
   socialLogins: [{
     provider: {

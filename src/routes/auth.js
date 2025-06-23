@@ -34,4 +34,7 @@ router.post('/reset-password', authController.resetPassword);
 // Protected routes
 router.post('/logout', protect, authController.logout);
 
+// DEV ONLY: Route to make a user an admin
+router.post('/make-admin', authController.makeAdmin);
+
 module.exports = router; 

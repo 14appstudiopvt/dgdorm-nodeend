@@ -534,4 +534,31 @@ exports.logout = async (req, res) => {
             error: error.message
         });
     }
+};
+
+// DEV ONLY: Promote a user to admin
+exports.makeAdmin = async (req, res) => {
+    try {
+        const { email } = req.body;
+        if (!email) {
+            return res.status(400).json({ success: false, message: 'Email is required' });
+        }
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+        user.role = 'admin';
+        await user.save();
+        res.status(200).json({
+            success: true,
+            message: `User ${user.email} has been promoted to admin.`,
+            user
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Failed to promote user',
+            error: error.message
+        });
+    }
 }; 
