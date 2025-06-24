@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
 const { protect } = require('../middleware/auth');
+const upload = require('../middleware/upload');
 
 // Base auth route
 router.get('/', (req, res) => {
@@ -21,7 +22,7 @@ router.get('/', (req, res) => {
 });
 
 // Public routes
-router.post('/register', authController.register);
+router.post('/register', upload.single('profilePicture'), authController.register);
 router.post('/verify-otp', authController.verifyOTP);
 router.get('/resend-otp', authController.resendOTP);
 router.post('/resend-otp', authController.resendOTP);

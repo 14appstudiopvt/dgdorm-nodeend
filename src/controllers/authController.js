@@ -29,9 +29,10 @@ exports.register = async (req, res) => {
             dateOfBirth,
             gender,
             address,
-            profilePicture,
             role
         } = req.body;
+
+        const profilePicture = req.file ? req.file.path : req.body.profilePicture;
 
         // Check if user already exists
         const existingUser = await User.findOne({ email });
@@ -534,7 +535,7 @@ exports.logout = async (req, res) => {
             error: error.message
         });
     }
-};
+}; 
 
 // DEV ONLY: Promote a user to admin
 exports.makeAdmin = async (req, res) => {

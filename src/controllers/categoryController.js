@@ -3,7 +3,9 @@ const Category = require('../models/Category');
 // Create
 exports.createCategory = async (req, res) => {
     try {
-        const { name, description, icon } = req.body;
+        const { name, description } = req.body;
+        const icon = req.file ? req.file.path : req.body.icon;
+
         if (!name) {
             return res.status(400).json({ success: false, message: 'Category name is required' });
         }
