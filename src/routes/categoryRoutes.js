@@ -29,7 +29,7 @@ router.get('/infoCategory', (req, res) => {
 router.post('/create-category', protect, requireAdmin, upload.single('icon'), createCategory);
 router.get('/get-all-category', protect, requireAdmin, getCategories);
 router.get('/get-category-by-name/:name', protect, requireAdmin, getCategoryByName);
-router.put('/update-category-by-id/:id', protect, requireAdmin, updateCategory);
+router.put('/update-category-by-id/:id', protect, requireAdmin, upload.single('icon'), updateCategory);
 router.delete('/delete-category-by-id/:id', protect, requireAdmin, deleteCategory);
 
 module.exports = router;
