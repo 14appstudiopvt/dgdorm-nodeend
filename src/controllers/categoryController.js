@@ -3,10 +3,16 @@ const Category = require('../models/Category');
 // Create
 exports.createCategory = async (req, res) => {
     try {
-        // Debug logs
+        // Debug logs (optional, remove in production)
         console.log('DEBUG createCategory: req.user:', req.user);
         console.log('DEBUG createCategory: req.body:', req.body);
         console.log('DEBUG createCategory: req.file:', req.file);
+
+        // Ensure user is authenticated
+        if (!req.user || !req.user._id) {
+            return res.status(401).json({ success: false, message: 'Not authorized' });
+        }
+
         const { name, description } = req.body;
         const icon = req.file ? req.file.path : req.body.icon;
 
@@ -21,11 +27,10 @@ exports.createCategory = async (req, res) => {
             name,
             description,
             icon,
-            createdBy: req.user ? req.user._id : undefined // Defensive: avoid crash if req.user is undefined
+            createdBy: req.user._id
         });
         res.status(201).json({ success: true, data: category });
     } catch (error) {
-        // Enhanced error logging
         console.error('ERROR in createCategory:', error);
         res.status(500).json({ success: false, message: 'Failed to create category', error: error.message });
     }
