@@ -47,11 +47,19 @@ const userSchema = new mongoose.Schema({
   },
   profilePicture: {
     type: String,
-    default: null
+    default: ''
+  },
+  favorites: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Property'
+  }],
+  isBanned: {
+    type: Boolean,
+    default: false
   },
   role: {
     type: String,
-    enum: ['user', 'admin'],
+    enum: ['user', 'owner', 'admin'],
     default: 'user'
   },
   isVerified: {

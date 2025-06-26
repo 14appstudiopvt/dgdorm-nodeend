@@ -70,6 +70,8 @@ const mongoose = require('mongoose');
 // Import routes
 const authRoutes = require('./routes/auth');
 const categoryRoutes = require('./routes/categoryRoutes');
+const propertyRoutes = require('./routes/propertyRoutes');
+
 // Initialize Express app
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -252,6 +254,7 @@ app.get('/api', (req, res) => {
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api', propertyRoutes);
 
 // 404 handler - must be after all routes
 app.use((req, res) => {

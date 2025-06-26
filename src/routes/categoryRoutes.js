@@ -26,7 +26,8 @@ router.get('/infoCategory', (req, res) => {
 });
 
 // Admin-only category management
-router.post('/create-category', protect, requireAdmin, createCategory);router.get('/get-all-category', protect, requireAdmin, getCategories);
+router.post('/create-category', protect, requireAdmin, createCategory);
+router.get('/get-all-category', protect, requireAdmin, getCategories);
 router.get('/get-category-by-name/:name', protect, requireAdmin, getCategoryByName);
 router.put('/update-category-by-id/:id', protect, requireAdmin, upload.single('icon'), updateCategory);
 router.delete('/delete-category-by-id/:id', protect, requireAdmin, deleteCategory);

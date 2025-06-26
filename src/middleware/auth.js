@@ -42,8 +42,17 @@ const requireAdmin = (req, res, next) => {
   next();
 };
 
+// Middleware to require owner role
+const requireOwner = (req, res, next) => {
+  if (!req.user || (req.user.role !== 'owner' && req.user.role !== 'admin')) {
+    return res.status(403).json({ success: false, message: 'Owner access required' });
+  }
+  next();
+};
+
 module.exports = {
   protect,
   requireRole,
-  requireAdmin
+  requireAdmin,
+  requireOwner
 };
