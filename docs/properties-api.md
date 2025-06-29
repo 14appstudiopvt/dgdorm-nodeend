@@ -4,6 +4,65 @@ This document describes the API endpoints for managing and retrieving property d
 
 ---
 
+## Endpoint Summary
+
+### Public Property Routes
+
+| Method | Endpoint               | Access | Description                                   |
+| ------ | ---------------------- | ------ | --------------------------------------------- |
+| GET    | /api/properties        | Public | Get all approved properties (with pagination) |
+| GET    | /api/properties/:id    | Public | Get a single approved property by ID          |
+| POST   | /api/properties/filter | Public | Filter/search properties by criteria          |
+
+### User Favorite Routes
+
+| Method | Endpoint                 | Access  | Description                        |
+| ------ | ------------------------ | ------- | ---------------------------------- |
+| POST   | /api/users/:id/favorites | Private | Add a property to user's favorites |
+| GET    | /api/users/:id/favorites | Private | Get user's favorite properties     |
+
+### Owner Property Routes
+
+| Method | Endpoint                  | Access | Description                                |
+| ------ | ------------------------- | ------ | ------------------------------------------ |
+| GET    | /api/owner/properties     | Owner  | Get all properties for the logged-in owner |
+| POST   | /api/properties           | Owner  | Create a new property                      |
+| PUT    | /api/owner/properties/:id | Owner  | Update a property owned by the owner       |
+| DELETE | /api/owner/properties/:id | Owner  | Delete a property owned by the owner       |
+
+### Admin Moderation Routes
+
+| Method | Endpoint                          | Access | Description                               |
+| ------ | --------------------------------- | ------ | ----------------------------------------- |
+| GET    | /api/admin/properties             | Admin  | Get properties by status (e.g., pending)  |
+| POST   | /api/admin/properties/:id/approve | Admin  | Approve a property                        |
+| POST   | /api/admin/properties/:id/reject  | Admin  | Reject a property                         |
+| POST   | /api/admin/owners/:id/ban         | Admin  | Ban an owner and disable their properties |
+
+### Extra Admin APIs
+
+| Method | Endpoint                  | Access | Description                           |
+| ------ | ------------------------- | ------ | ------------------------------------- |
+| GET    | /api/admin/users          | Admin  | Get all users                         |
+| GET    | /api/admin/owners         | Admin  | Get all owners                        |
+| GET    | /api/admin/all-properties | Admin  | Get all properties (no status filter) |
+
+---
+
+## Authentication & Headers
+
+- **Public**: No authentication required.
+- **Private/Owner/Admin**: Requires JWT in the `Authorization` header:
+  - `Authorization: Bearer <token>`
+
+---
+
+## Detailed Endpoint Descriptions
+
+(See above in this file for request/response examples for each main endpoint. If you need a detailed example for any specific endpoint, let me know!)
+
+---
+
 ## 1. Get All Categories
 
 - **Endpoint:** `GET /api/categories`
