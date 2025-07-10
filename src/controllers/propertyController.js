@@ -179,17 +179,35 @@ exports.getOwnerProperties = async (req, res) => {
 // @access  Private (Owner)
 exports.createProperty = async (req, res) => {
   try {
-    const {
-      title,
-      description,
-      category,
-      address,
-      price,
-      amenities,
-      location
-    } = req.body;
+    console.log('Raw request body:', req.body);
+    console.log('Raw files:', req.files);
+    let { title, description, category, address, price, amenities, location } = req.body;
+    // Parse amenities if sent as a string (from form-data)
+    if (typeof amenities === 'string') {
+      try {
+        amenities = JSON.parse(amenities);
+      } catch {
+        amenities = [amenities];
+      }
+    }
+    // Parse location if sent as a string (from form-data)
+    if (typeof location === 'string') {
+      try {
+        location = JSON.parse(location);
+      } catch {
+        location = null;
+      }
+    }
+    // Defensive: handle both [lng, lat] and [lat, lng] (if keys are present)
+    let coordinates = null;
+    if (location && Array.isArray(location.coordinates)) {
+      coordinates = location.coordinates;
+    } else if (location && location.lng !== undefined && location.lat !== undefined) {
+      coordinates = [Number(location.lng), Number(location.lat)];
+    }
+    console.log('Parsed coordinates:', coordinates);
     const images = req.files ? req.files.map(file => file.path) : [];
-    if (!title || !description || !category || !address || !price || !location) {
+    if (!title || !description || !category || !address || !price || !coordinates) {
       return res.status(400).json({ success: false, message: 'Missing required fields' });
     }
     const property = await Property.create({
@@ -203,7 +221,7 @@ exports.createProperty = async (req, res) => {
       amenities: amenities || [],
       location: {
         type: 'Point',
-        coordinates: [location.lng, location.lat]
+        coordinates: coordinates
       }
     });
     res.status(201).json({ success: true, data: property });
