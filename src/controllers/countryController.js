@@ -6,7 +6,7 @@ exports.addCountry = async (req, res) => {
     const { name, lat, long } = req.body;
     const country = new Country({ name, lat, long, cities: [] });
     await country.save();
-    res.status(201).json(country);
+    res.status(201).json({ data: country });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -16,7 +16,7 @@ exports.addCountry = async (req, res) => {
 exports.getCountries = async (req, res) => {
   try {
     const countries = await Country.find();
-    res.json(countries);
+    res.json({ data: countries });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -32,7 +32,7 @@ exports.updateCountry = async (req, res) => {
       { new: true }
     );
     if (!country) return res.status(404).json({ error: 'Country not found' });
-    res.json(country);
+    res.json({ data: country });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -57,7 +57,7 @@ exports.addCity = async (req, res) => {
     if (!country) return res.status(404).json({ error: 'Country not found' });
     country.cities.push({ name, lat, long });
     await country.save();
-    res.status(201).json(country);
+    res.status(201).json({ data: country });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -75,7 +75,7 @@ exports.updateCity = async (req, res) => {
     city.lat = lat;
     city.long = long;
     await country.save();
-    res.json(country);
+    res.json({ data: country });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -90,7 +90,7 @@ exports.deleteCity = async (req, res) => {
     if (!city) return res.status(404).json({ error: 'City not found' });
     city.remove();
     await country.save();
-    res.json(country);
+    res.json({ data: country });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -100,7 +100,7 @@ exports.deleteCity = async (req, res) => {
 exports.getDropdown = async (req, res) => {
   try {
     const countries = await Country.find({}, 'name cities');
-    res.json(countries);
+    res.json({ data: countries });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
