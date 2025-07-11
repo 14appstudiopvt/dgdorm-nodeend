@@ -71,6 +71,7 @@ const mongoose = require('mongoose');
 const authRoutes = require('./routes/auth');
 const categoryRoutes = require('./routes/categoryRoutes');
 const propertyRoutes = require('./routes/propertyRoutes');
+const countryRoutes = require('./routes/countryRoutes');
 
 // Initialize Express app
 const app = express();
@@ -254,6 +255,7 @@ app.get('/api', (req, res) => {
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api/locations', countryRoutes);
 app.use('/api', propertyRoutes);
 
 // 404 handler - must be after all routes

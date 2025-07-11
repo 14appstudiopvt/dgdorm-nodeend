@@ -23,6 +23,10 @@
       "dest": "/src/index.js"
     },
     {
+      "src": "/api/locations/(.*)",
+      "dest": "/src/index.js"
+    },
+    {
       "src": "/api/(.*)",
       "dest": "/src/index.js"
     },
