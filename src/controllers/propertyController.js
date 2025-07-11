@@ -21,17 +21,16 @@ exports.getProperties = async (req, res) => {
     const total = await Property.countDocuments({ status: 'approved' });
 
     res.status(200).json({
-      success: true,
+      data: properties,
       count: properties.length,
       pagination: {
         total,
         page,
         pages: Math.ceil(total / limit),
-      },
-      data: properties,
+      }
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -45,12 +44,12 @@ exports.getPropertyById = async (req, res) => {
       .populate('category', 'name');
 
     if (!property) {
-      return res.status(404).json({ success: false, message: 'Property not found or not approved' });
+      return res.status(404).json({ error: 'Property not found or not approved' });
     }
 
-    res.status(200).json({ success: true, data: property });
+    res.status(200).json({ data: property });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -101,9 +100,9 @@ exports.filterProperties = async (req, res) => {
       .populate('owner', 'firstName lastName email')
       .populate('category', 'name');
 
-    res.status(200).json({ success: true, count: properties.length, data: properties });
+    res.status(200).json({ data: properties, count: properties.length });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -118,20 +117,20 @@ exports.addFavorite = async (req, res) => {
     const userId = req.params.id;
     const propertyId = req.body.propertyId;
     if (!propertyId) {
-      return res.status(400).json({ success: false, message: 'Property ID is required' });
+      return res.status(400).json({ error: 'Property ID is required' });
     }
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
+      return res.status(404).json({ error: 'User not found' });
     }
     if (user.favorites.includes(propertyId)) {
-      return res.status(400).json({ success: false, message: 'Property already in favorites' });
+      return res.status(400).json({ error: 'Property already in favorites' });
     }
     user.favorites.push(propertyId);
     await user.save();
-    res.status(200).json({ success: true, message: 'Property added to favorites' });
+    res.status(200).json({ message: 'Property added to favorites' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -149,11 +148,11 @@ exports.getFavorites = async (req, res) => {
       ]
     });
     if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
+      return res.status(404).json({ error: 'User not found' });
     }
-    res.status(200).json({ success: true, count: user.favorites.length, data: user.favorites });
+    res.status(200).json({ data: user.favorites, count: user.favorites.length });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -168,9 +167,9 @@ exports.getOwnerProperties = async (req, res) => {
     const ownerId = req.user._id;
     const properties = await Property.find({ owner: ownerId })
       .populate('category', 'name');
-    res.status(200).json({ success: true, count: properties.length, data: properties });
+    res.status(200).json({ data: properties, count: properties.length });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -179,8 +178,6 @@ exports.getOwnerProperties = async (req, res) => {
 // @access  Private (Owner)
 exports.createProperty = async (req, res) => {
   try {
-    console.log('Raw request body:', req.body);
-    console.log('Raw files:', req.files);
     let { title, description, category, address, price, amenities, location } = req.body;
     // Parse amenities if sent as a string (from form-data)
     if (typeof amenities === 'string') {
@@ -205,10 +202,9 @@ exports.createProperty = async (req, res) => {
     } else if (location && location.lng !== undefined && location.lat !== undefined) {
       coordinates = [Number(location.lng), Number(location.lat)];
     }
-    console.log('Parsed coordinates:', coordinates);
     const images = req.files ? req.files.map(file => file.path) : [];
     if (!title || !description || !category || !address || !price || !coordinates) {
-      return res.status(400).json({ success: false, message: 'Missing required fields' });
+      return res.status(400).json({ error: 'Missing required fields' });
     }
     const property = await Property.create({
       title,
@@ -224,9 +220,9 @@ exports.createProperty = async (req, res) => {
         coordinates: coordinates
       }
     });
-    res.status(201).json({ success: true, data: property });
+    res.status(201).json({ data: property });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -238,10 +234,10 @@ exports.updateProperty = async (req, res) => {
     const propertyId = req.params.id;
     const property = await Property.findById(propertyId);
     if (!property) {
-      return res.status(404).json({ success: false, message: 'Property not found' });
+      return res.status(404).json({ error: 'Property not found' });
     }
     if (property.owner.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
-      return res.status(403).json({ success: false, message: 'Not authorized' });
+      return res.status(403).json({ error: 'Not authorized' });
     }
     const {
       title,
@@ -270,9 +266,9 @@ exports.updateProperty = async (req, res) => {
       property.images = req.files.map(file => file.path);
     }
     await property.save();
-    res.status(200).json({ success: true, data: property });
+    res.status(200).json({ data: property });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -284,15 +280,15 @@ exports.deleteProperty = async (req, res) => {
     const propertyId = req.params.id;
     const property = await Property.findById(propertyId);
     if (!property) {
-      return res.status(404).json({ success: false, message: 'Property not found' });
+      return res.status(404).json({ error: 'Property not found' });
     }
     if (property.owner.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
-      return res.status(403).json({ success: false, message: 'Not authorized' });
+      return res.status(403).json({ error: 'Not authorized' });
     }
     await property.deleteOne();
-    res.status(200).json({ success: true, message: 'Property deleted' });
+    res.status(200).json({ message: 'Property deleted' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -308,9 +304,9 @@ exports.getPropertiesByStatus = async (req, res) => {
     const properties = await Property.find({ status })
       .populate('owner', 'firstName lastName email')
       .populate('category', 'name');
-    res.status(200).json({ success: true, count: properties.length, data: properties });
+    res.status(200).json({ data: properties, count: properties.length });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -322,13 +318,13 @@ exports.approveProperty = async (req, res) => {
     const propertyId = req.params.id;
     const property = await Property.findById(propertyId);
     if (!property) {
-      return res.status(404).json({ success: false, message: 'Property not found' });
+      return res.status(404).json({ error: 'Property not found' });
     }
     property.status = 'approved';
     await property.save();
-    res.status(200).json({ success: true, message: 'Property approved', data: property });
+    res.status(200).json({ data: property, message: 'Property approved' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -340,13 +336,13 @@ exports.rejectProperty = async (req, res) => {
     const propertyId = req.params.id;
     const property = await Property.findById(propertyId);
     if (!property) {
-      return res.status(404).json({ success: false, message: 'Property not found' });
+      return res.status(404).json({ error: 'Property not found' });
     }
     property.status = 'rejected';
     await property.save();
-    res.status(200).json({ success: true, message: 'Property rejected', data: property });
+    res.status(200).json({ data: property, message: 'Property rejected' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -358,15 +354,15 @@ exports.banOwner = async (req, res) => {
     const ownerId = req.params.id;
     const owner = await User.findById(ownerId);
     if (!owner || owner.role !== 'owner') {
-      return res.status(404).json({ success: false, message: 'Owner not found' });
+      return res.status(404).json({ error: 'Owner not found' });
     }
     owner.isBanned = true;
     await owner.save();
     // Set all their properties to unavailable
     await Property.updateMany({ owner: ownerId }, { isAvailable: false });
-    res.status(200).json({ success: true, message: 'Owner banned and their properties disabled' });
+    res.status(200).json({ message: 'Owner banned and their properties disabled' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -378,9 +374,9 @@ exports.banOwner = async (req, res) => {
 exports.getAllUsers = async (req, res) => {
   try {
     const users = await User.find().select('-password');
-    res.status(200).json({ success: true, count: users.length, data: users });
+    res.status(200).json({ data: users, count: users.length });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -390,9 +386,9 @@ exports.getAllUsers = async (req, res) => {
 exports.getAllOwners = async (req, res) => {
   try {
     const owners = await User.find({ role: 'owner' }).select('-password');
-    res.status(200).json({ success: true, count: owners.length, data: owners });
+    res.status(200).json({ data: owners, count: owners.length });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -404,8 +400,8 @@ exports.getAllProperties = async (req, res) => {
     const properties = await Property.find()
       .populate('owner', 'firstName lastName email')
       .populate('category', 'name');
-    res.status(200).json({ success: true, count: properties.length, data: properties });
+    res.status(200).json({ data: properties, count: properties.length });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+    res.status(500).json({ error: error.message });
   }
 }; 

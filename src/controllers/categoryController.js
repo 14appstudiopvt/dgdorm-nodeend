@@ -12,12 +12,12 @@ exports.createCategory = async (req, res) => {
     }
 
     if (!name) {
-      return res.status(400).json({ success: false, message: 'Category name is required' });
+      return res.status(400).json({ error: 'Category name is required' });
     }
 
     const existing = await Category.findOne({ name });
     if (existing) {
-      return res.status(400).json({ success: false, message: 'Category already exists' });
+      return res.status(400).json({ error: 'Category already exists' });
     }
 
     const category = await Category.create({
@@ -27,10 +27,9 @@ exports.createCategory = async (req, res) => {
       createdBy: req.user._id
     });
 
-    res.status(201).json({ success: true, data: category });
+    res.status(201).json({ data: category });
   } catch (error) {
-    console.error('Create Category Error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -38,9 +37,9 @@ exports.createCategory = async (req, res) => {
 exports.getCategories = async (req, res) => {
   try {
     const categories = await Category.find().populate('createdBy', 'firstName lastName email role');
-    res.status(200).json({ success: true, data: categories });
+    res.status(200).json({ data: categories });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -50,11 +49,11 @@ exports.getCategoryByName = async (req, res) => {
     const { name } = req.params;
     const category = await Category.findOne({ name }).populate('createdBy', 'firstName lastName email role');
     if (!category) {
-      return res.status(404).json({ success: false, message: 'Category not found' });
+      return res.status(404).json({ error: 'Category not found' });
     }
-    res.status(200).json({ success: true, data: category });
+    res.status(200).json({ data: category });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -78,11 +77,11 @@ exports.updateCategory = async (req, res) => {
       { new: true }
     );
     if (!category) {
-      return res.status(404).json({ success: false, message: 'Category not found' });
+      return res.status(404).json({ error: 'Category not found' });
     }
-    res.status(200).json({ success: true, data: category });
+    res.status(200).json({ data: category });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -92,10 +91,10 @@ exports.deleteCategory = async (req, res) => {
     const { id } = req.params;
     const category = await Category.findByIdAndDelete(id);
     if (!category) {
-      return res.status(404).json({ success: false, message: 'Category not found' });
+      return res.status(404).json({ error: 'Category not found' });
     }
-    res.status(200).json({ success: true, message: 'Category deleted' });
+    res.status(200).json({ message: 'Category deleted' });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
