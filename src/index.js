@@ -255,7 +255,7 @@ app.get('/api', (req, res) => {
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/categories', categoryRoutes);
-app.use('/api/locations', countryRoutes);
+app.use('/api/location', countryRoutes);
 app.use('/api', propertyRoutes);
 
 // 404 handler - must be after all routes
