@@ -86,9 +86,17 @@ exports.deleteCity = async (req, res) => {
   try {
     const country = await Country.findById(req.params.countryId);
     if (!country) return res.status(404).json({ error: 'Country not found' });
+
     const city = country.cities.id(req.params.cityId);
-    if (!city) return res.status(404).json({ error: 'City not found' });
-    city.remove();
+    if (city) {
+      city.remove();
+    } else {
+      // Fallback: filter out city if not found as subdoc (shouldn't be needed, but for robustness)
+      country.cities = country.cities.filter(
+        c => c._id.toString() !== req.params.cityId
+      );
+    }
+
     await country.save();
     res.json({ data: country });
   } catch (err) {
