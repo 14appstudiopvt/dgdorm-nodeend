@@ -16,4 +16,7 @@ router.delete('/countries/:countryId/cities/:cityId', countryController.deleteCi
 // Dropdown API
 router.get('/dropdown', countryController.getDropdown);
 
+// Search API for countries and cities
+router.get('/search', countryController.searchCountriesAndCities);
+
 module.exports = router; 

@@ -111,4 +111,46 @@ exports.getDropdown = async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+};
+
+// Search countries and cities by name
+exports.searchCountriesAndCities = async (req, res) => {
+  try {
+    const query = req.query.query || '';
+    if (!query) {
+      return res.status(400).json({ success: false, message: 'Query parameter is required' });
+    }
+    // Search countries by name
+    const countries = await Country.find({
+      name: { $regex: query, $options: 'i' }
+    });
+
+    // Search cities by name (across all countries)
+    const allCountries = await Country.find();
+    let cities = [];
+    allCountries.forEach(country => {
+      country.cities.forEach(city => {
+        if (city.name.toLowerCase().includes(query.toLowerCase())) {
+          cities.push({
+            _id: city._id,
+            name: city.name,
+            lat: city.lat,
+            long: city.long,
+            countryId: country._id,
+            countryName: country.name
+          });
+        }
+      });
+    });
+
+    res.json({
+      success: true,
+      data: {
+        countries,
+        cities
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
 }; 
