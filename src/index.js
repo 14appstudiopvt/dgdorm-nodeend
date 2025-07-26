@@ -72,6 +72,7 @@ const authRoutes = require('./routes/auth');
 const categoryRoutes = require('./routes/categoryRoutes');
 const propertyRoutes = require('./routes/propertyRoutes');
 const countryRoutes = require('./routes/countryRoutes');
+const userRoutes = require('./routes/userRoutes');
 
 // Initialize Express app
 const app = express();
@@ -256,6 +257,7 @@ app.get('/api', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/location', countryRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api', propertyRoutes);
 
 // 404 handler - must be after all routes
