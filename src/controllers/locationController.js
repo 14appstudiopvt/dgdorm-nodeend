@@ -16,21 +16,34 @@ exports.searchLocations = async (req, res) => {
       ]
     });
 
-    // Collect matching country names and city names
+    // Collect matching country and city suggestions with lat/long
     const suggestions = [];
     countries.forEach(country => {
       if (country.name.toLowerCase().includes(query)) {
-        suggestions.push(country.name);
+        suggestions.push({
+          type: 'country',
+          name: country.name,
+          lat: country.lat,
+          long: country.long
+        });
       }
       country.cities.forEach(city => {
         if (city.name.toLowerCase().includes(query)) {
-          suggestions.push(city.name);
+          suggestions.push({
+            type: 'city',
+            name: city.name,
+            lat: city.lat,
+            long: city.long,
+            country: country.name
+          });
         }
       });
     });
 
-    // Remove duplicates
-    const uniqueSuggestions = [...new Set(suggestions)];
+    // Remove duplicates by name and type
+    const uniqueSuggestions = suggestions.filter((sugg, idx, arr) =>
+      arr.findIndex(s => s.name === sugg.name && s.type === sugg.type) === idx
+    );
     res.json({ success: true, suggestions: uniqueSuggestions });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error', error: err.message });
