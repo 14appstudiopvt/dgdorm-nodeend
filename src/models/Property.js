@@ -36,6 +36,14 @@ const PropertySchema = new mongoose.Schema({
     type: String,
     required: [true, 'Property address is required'],
   },
+  city: {
+    type: String,
+    required: [true, 'Property city is required'],
+  },
+  country: {
+    type: String,
+    required: [true, 'Property country is required'],
+  },
   price: {
     type: Number,
     required: [true, 'Property price is required'],
@@ -64,4 +72,4 @@ PropertySchema.index({ location: '2dsphere' });
 // Index for text search
 PropertySchema.index({ title: 'text', description: 'text' });
 
-module.exports = mongoose.model('Property', PropertySchema); 
+module.exports = mongoose.model('Property', PropertySchema);
